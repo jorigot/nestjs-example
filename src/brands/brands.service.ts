@@ -11,11 +11,17 @@ export class BrandsService {
   ];
 
   create(createBrandDto: CreateBrandDto) {
-    return 'This action adds a new brand';
+    const newBrand: Brand = {
+      id: uuid(),
+      name: createBrandDto.name.toLocaleLowerCase(),
+      createdAt: new Date().getTime(),
+    };
+    this.brands.push(newBrand);
+    return newBrand;
   }
 
   findAll() {
-    return `This action returns all brands`;
+    return this.brands;
   }
 
   findOne(id: string) {
@@ -23,13 +29,35 @@ export class BrandsService {
     if (!brand) {
       throw new NotFoundException();
     }
+    return brand;
   }
 
-  update(id: number, updateBrandDto: UpdateBrandDto) {
-    return `This action updates a #${id} brand`;
+  update(id: string, updateBrandDto: UpdateBrandDto) {
+    let foundBrand = this.brands.find((br: Brand) => br.id === id);
+    if (!foundBrand) {
+      throw new NotFoundException(`Could not find brand with id: '${id}'.`);
+    }
+    this.brands = this.brands.map((br: Brand) => {
+      if (br.id === foundBrand.id) {
+        foundBrand = {
+          ...foundBrand,
+          ...updateBrandDto,
+          updatedAt: new Date().getTime(),
+          id,
+        };
+        return foundBrand;
+      }
+      return br;
+    });
+    return foundBrand;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} brand`;
+  remove(id: string) {
+    const foundBrand = this.brands.find((br: Brand) => br.id === id);
+    if (!foundBrand) {
+      throw new NotFoundException(`Could not find brand with id: '${id}'.`);
+    }
+    this.brands = this.brands.filter((br: Brand) => br.id !== id);
+    return foundBrand;
   }
 }
